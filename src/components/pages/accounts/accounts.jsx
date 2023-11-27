@@ -2,9 +2,12 @@ import React, { useRef, useEffect, useState } from "react";
 import axios from "axios";
 
 function Accounts() {
-  const modal = useRef();
+  const modalkurs = useRef();
+  const modalguruh = useRef();
   const [course, setCourse] = useState([]);
   const [group, setGroup] = useState([]);
+  const [coursetitle, setCourseTitle] = useState([]);
+  const [grouptitle, setGroupTitle] = useState([]);
 
   async function fetchCourseData() {
     try {
@@ -27,18 +30,63 @@ function Accounts() {
       console.log("Error fetching group data:", error);
     }
   }
+
+  const handleCourse = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await axios.post(
+        "https://hidoya.pythonanywhere.com/api/v1/course/",
+        {
+          title: coursetitle,
+        }
+      );
+      console.log("POST request sent!", response.data);
+    } catch (error) {
+      console.error("Error sending POST request:", error);
+    }
+  };
+
+  const handleGuruh = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await axios.post(
+        "https://hidoya.pythonanywhere.com/api/v1/groups/",
+        {
+          title: grouptitle,
+        }
+      );
+      console.log("POST request sent!", response.data);
+    } catch (error) {
+      console.error("Error sending POST request:", error);
+    }
+  };
+
   useEffect(() => {
     fetchCourseData();
     fetchGroupData();
   }, []);
 
-  // useEffect(() => {
-  //   console.log("Course data:", course); // Log course data
-  // }, [course]); // Log whenever 'course' changes
+  const deleteCourse = async (id) => {
+    try {
+      const response = await axios.delete(
+        `https://hidoya.pythonanywhere.com/api/v1/course/${id}`
+      );
+      fetchCourseData(); // Refresh course data after deletion
+    } catch (error) {
+      console.error("Error deleting course:", error);
+    }
+  };
 
-  // useEffect(() => {
-  //   console.log("Group data:", group); // Log group data
-  // }, [group]); // Log whenever 'group' changes
+  const deleteGroup = async (id) => {
+    try {
+      const response = await axios.delete(
+        `https://hidoya.pythonanywhere.com/api/v1/groups/${id}`
+      );
+      fetchGroupData(); // Refresh course data after deletion
+    } catch (error) {
+      console.error("Error deleting course:", error);
+    }
+  };
 
   return (
     <>
@@ -50,7 +98,7 @@ function Accounts() {
           <div className="w-full flex justify-between">
             <div className="relative">
               <button
-                onClick={() => modal.current.showModal()}
+                onClick={() => modalkurs.current.showModal()}
                 className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                 type="button"
               >
@@ -60,7 +108,7 @@ function Accounts() {
 
             <div>
               <button
-                onClick={() => modal.current.showModal()}
+                onClick={() => modalguruh.current.showModal()}
                 className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                 type="button"
               >
@@ -88,7 +136,7 @@ function Accounts() {
                   </div>
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Guruh
+                  Kurs
                 </th>
                 <th scope="col" className="px-6 py-3 text-center">
                   Action
@@ -145,7 +193,10 @@ function Accounts() {
                               />
                             </svg>
                           </button>
-                          <button className="flex p-2.5  bg-red-500 rounded-xl hover:rounded-3xl hover:bg-red-600 transition-all duration-300 text-white">
+                          <button
+                            onClick={() => deleteCourse(courseItem?.id)}
+                            className="flex p-2.5  bg-red-500 rounded-xl hover:rounded-3xl hover:bg-red-600 transition-all duration-300 text-white"
+                          >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               className="h-5 w-5"
@@ -244,7 +295,10 @@ function Accounts() {
                               />
                             </svg>
                           </button>
-                          <button className="flex p-2.5  bg-red-500 rounded-xl hover:rounded-3xl hover:bg-red-600 transition-all duration-300 text-white">
+                          <button
+                            onClick={() => deleteGroup(groupItem?.id)}
+                            className="flex p-2.5  bg-red-500 rounded-xl hover:rounded-3xl hover:bg-red-600 transition-all duration-300 text-white"
+                          >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               className="h-5 w-5"
@@ -270,102 +324,74 @@ function Accounts() {
         </div>
       </div>
 
-      <dialog ref={modal}>
-        <div className="p-10 bg-gray-400">
-          <form action="">
-            <div>
-              <label
-                htmlFor="first_name"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-900"
-              >
-                First name
-              </label>
-              <input
-                type="text"
-                id="first_name"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Anvar"
-                required
-              />
-            </div>
-            <div className="mt-2">
-              <label
-                htmlFor="last_name"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-900"
-              >
-                Last name
-              </label>
-              <input
-                type="text"
-                id="last_name"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Alimov"
-                required
-              />
-            </div>
-            <div className="mt-2">
-              <label
-                htmlFor="visitors"
-                className="block mb-2 text-sm font-medium text-gray-900"
-              >
-                Kursi
-              </label>
-              <input
-                type="number"
-                id="visitors"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder=""
-                required
-              />
-            </div>
-            <div className="mt-2">
-              <label
-                htmlFor="phone"
-                className="block mb-2 text-sm font-medium text-gray-900 "
-              >
-                Phone number
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="123-45-678"
-                pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}"
-                required
-              />
-            </div>
-            <div className="mt-3">
-              <label
-                htmlFor="first_name"
-                className="block mb-2 text-sm font-medium text-gray-900 "
-              >
-                Olinadigan kitob
-              </label>
-              <input
-                type="text"
-                id="first_name"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700  dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Kitob nomi"
-                required
-              />
-            </div>
-            <div className="mt-5">
-              <button
-                type="button"
-                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none mt-3"
-              >
-                Jo'natish
-              </button>
-              <button
-                onClick={() => modal.current.close()}
-                type="button"
-                className="text-white bg-gray-700 hover:bg-gray-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2  focus:outline-none mt-3 ml-6"
-              >
-                Yopish
-              </button>
-            </div>
-          </form>
-        </div>
+      <dialog ref={modalkurs}>
+        <form onSubmit={handleCourse}>
+          <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-900">
+            Title
+          </label>
+          <input
+            type="text"
+            name="title"
+            id="title"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder="Anvar"
+            value={coursetitle} // Use coursetitle here
+            onChange={(e) => setCourseTitle(e.target.value)}
+            required
+          />
+
+          <div className="flex">
+            <button
+              // onClick={() => modalguruh.current.close()}
+              type="submit"
+              className="block mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
+              Submit
+            </button>
+            <button
+              onClick={() => modalguruh.current.close()}
+              type="button"
+              className=" text-white bg-gray-700 hover:bg-gray-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2  focus:outline-none mt-3 ml-6"
+            >
+              Yopish
+            </button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog ref={modalguruh}>
+        <form onSubmit={handleGuruh}>
+          <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-900">
+            Title
+          </label>
+          <input
+            type="text"
+            name="title"
+            id="title"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder="Anvar"
+            value={grouptitle} // Use coursetitle here
+            onChange={(e) => setGroupTitle(e.target.value)}
+            required
+          />
+
+          <div className="flex">
+            <button
+              onClick={() => modalkurs.current.close()}
+              type="submit"
+              className="block mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
+              Submit
+            </button>
+            <button
+              onClick={() => modalkurs.current.close()}
+              type="button"
+              className="ml-3 text-white bg-gray-700 hover:bg-gray-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2  focus:outline-none mt-3 ml-6"
+            >
+              Yopish
+            </button>
+          </div>
+        </form>
       </dialog>
     </>
   );
